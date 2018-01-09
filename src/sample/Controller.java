@@ -158,6 +158,13 @@ public class Controller implements Initializable {
         addInfoText.setText(addSequenceInfo);
     }
 
+    @FXML
+    private void clear() {
+        sequenceTextArea.setText("");
+        fromFileCheckBox.setSelected(false);
+        addInfoText.setText("");
+    }
+
     private List<Sequence> getSequenceFromFASTAFile(SequenceType selectedSequenceType)
             throws CompoundNotFoundException, IOException {
         List<Sequence> sequenceList = null;
