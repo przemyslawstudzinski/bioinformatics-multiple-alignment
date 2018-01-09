@@ -5,6 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
@@ -45,6 +46,8 @@ public class Controller implements Initializable {
         RNA
     }
 
+    public static final String addSequenceInfo = "Sequence/s was/were added.";
+
     @FXML
     private ListView<Alignments.ProfileProfileAlignerType> profilesListView;
 
@@ -56,6 +59,9 @@ public class Controller implements Initializable {
 
     @FXML
     private TextArea sequenceTextArea;
+
+    @FXML
+    private Label addInfoText;
 
     @FXML
     private TextArea resultTextArea;
@@ -149,6 +155,7 @@ public class Controller implements Initializable {
                 sequences.add(sequence);
             }
         }
+        addInfoText.setText(addSequenceInfo);
     }
 
     private List<Sequence> getSequenceFromFASTAFile(SequenceType selectedSequenceType)
