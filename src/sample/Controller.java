@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
 
 import static sample.Controller.SequenceType.*;
 
-
 public class Controller implements Initializable {
 
     public enum SequenceType {
@@ -55,6 +54,15 @@ public class Controller implements Initializable {
     @FXML
     private ListView<SequenceType> sequencesListView;
 
+    @FXML
+    private TextArea sequenceTextArea;
+
+    @FXML
+    private TextArea resultTextArea;
+
+    @FXML
+    private CheckBox fromFileCheckBox;
+
     private final ObservableList<Alignments.ProfileProfileAlignerType> profiles
             = FXCollections.observableArrayList();
 
@@ -65,15 +73,6 @@ public class Controller implements Initializable {
             = FXCollections.observableArrayList();
 
     private File fileWithSequence;
-
-    @FXML
-    private TextArea sequenceTextArea;
-
-    @FXML
-    private TextArea resultTextArea;
-
-    @FXML
-    private CheckBox fromFileCheckBox;
 
     private List<Sequence> sequences = new ArrayList<>();
 
@@ -213,5 +212,4 @@ public class Controller implements Initializable {
 
         resultTextArea.setText(result);
     }
-
 }
