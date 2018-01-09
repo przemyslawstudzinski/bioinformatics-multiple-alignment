@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="forester-1.038">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/forester-1.038.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

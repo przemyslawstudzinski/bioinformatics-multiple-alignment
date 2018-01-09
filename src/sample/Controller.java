@@ -26,13 +26,10 @@ import org.biojava.nbio.core.sequence.io.RNASequenceCreator;
 import org.biojava.nbio.core.sequence.template.Sequence;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -43,7 +40,7 @@ import static sample.Controller.SequenceType.*;
 
 public class Controller implements Initializable {
 
-    public enum SequenceType{
+    public enum SequenceType {
         PROTEIN,
         DNA,
         RNA
@@ -71,6 +68,9 @@ public class Controller implements Initializable {
 
     @FXML
     private TextArea sequenceTextArea;
+
+    @FXML
+    private TextArea resultTextArea;
 
     @FXML
     private CheckBox fromFileCheckBox;
@@ -106,8 +106,7 @@ public class Controller implements Initializable {
     }
 
     @FXML
-    private void openFile()
-    {
+    private void openFile() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Resource File");
 
@@ -115,7 +114,7 @@ public class Controller implements Initializable {
         sequenceTextArea.setText(readFile(fileWithSequence));
     }
 
-    private String readFile(File file){
+    private String readFile(File file) {
         StringBuilder stringBuffer = new StringBuilder();
         BufferedReader bufferedReader = null;
         try {
@@ -202,10 +201,17 @@ public class Controller implements Initializable {
     }
 
     @FXML
-    private void calculateMultiAlignment()
-    {
+    private void calculateMultiAlignment() {
+        Alignments.ProfileProfileAlignerType profileProfileAlignerType =
+                profilesListView.getSelectionModel().getSelectedItem();
 
+        Alignments.PairwiseSequenceScorerType pairwiseSequenceScorerType =
+                scoringTypesListView.getSelectionModel().getSelectedItem();
+
+        String result = Alignments.getMultipleSequenceAlignment(
+                this.sequences, profileProfileAlignerType, pairwiseSequenceScorerType).toString();
+
+        resultTextArea.setText(result);
     }
-
 
 }

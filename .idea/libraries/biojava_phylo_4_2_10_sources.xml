@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="biojava-phylo-4.2.10-sources">
+    <CLASSES />
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/biojava-phylo-4.2.10-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
