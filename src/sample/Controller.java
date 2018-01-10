@@ -26,10 +26,7 @@ import org.biojava.nbio.core.sequence.io.ProteinSequenceCreator;
 import org.biojava.nbio.core.sequence.io.RNASequenceCreator;
 import org.biojava.nbio.core.sequence.template.Sequence;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +65,9 @@ public class Controller implements Initializable {
 
     @FXML
     private CheckBox fromFileCheckBox;
+
+    @FXML
+    private ListView sequenceInApp;
 
     private final ObservableList<Alignments.ProfileProfileAlignerType> profiles
             = FXCollections.observableArrayList();
@@ -145,17 +145,26 @@ public class Controller implements Initializable {
         List<Sequence> sequenceList;
 
         if (fromFileCheckBox.isSelected()) {
-            sequenceList = getSequenceFromFASTAFile(selectedSequenceType);
-            if (sequenceList != null) {
-                sequences.addAll(sequenceList);
+            try {
+                sequenceList = getSequenceFromFASTAFile(selectedSequenceType);
+                if (sequenceList != null) {
+                    sequences.addAll(sequenceList);
+                    addInfoText.setText(addSequenceInfo);
+                    updateSequenceInApp();
+                }
+            } catch (CompoundNotFoundException e) {
+                AlertClass.showAlert("Error", null, "Wrong selected sequence type.");
+            } catch (IOException e) {
+                AlertClass.showAlert("File", null, "File not found.");
             }
         } else {
             sequence = getSequenceFromInputText(selectedSequenceType, inputText, sequence);
             if (sequence != null) {
                 sequences.add(sequence);
+                addInfoText.setText(addSequenceInfo);
+                updateSequenceInApp();
             }
         }
-        addInfoText.setText(addSequenceInfo);
     }
 
     @FXML
@@ -170,27 +179,27 @@ public class Controller implements Initializable {
         List<Sequence> sequenceList = null;
         switch (selectedSequenceType) {
             case DNA:
-                FastaReader<DNASequence, NucleotideCompound> fastaReaderDNA = new FastaReader<DNASequence, NucleotideCompound>(
+                FastaReader<DNASequence, NucleotideCompound> fastaReaderDNA = null;
+                fastaReaderDNA = new FastaReader<DNASequence, NucleotideCompound>(
                         fileWithSequence,
                         new GenericFastaHeaderParser<>(),
                         new DNASequenceCreator(DNACompoundSet.getDNACompoundSet()));
-
                 sequenceList = fastaReaderDNA.process().values().stream().collect(Collectors.toList());
                 break;
             case RNA:
-                FastaReader<RNASequence, NucleotideCompound> fastaReaderRNA = new FastaReader<RNASequence, NucleotideCompound>(
+                FastaReader<RNASequence, NucleotideCompound> fastaReaderRNA = null;
+                fastaReaderRNA = new FastaReader<RNASequence, NucleotideCompound>(
                         fileWithSequence,
                         new GenericFastaHeaderParser<>(),
                         new RNASequenceCreator(RNACompoundSet.getRNACompoundSet()));
-
                 sequenceList = fastaReaderRNA.process().values().stream().collect(Collectors.toList());
                 break;
             case PROTEIN:
-                FastaReader<ProteinSequence, AminoAcidCompound> fastaReaderProtein = new FastaReader<ProteinSequence, AminoAcidCompound>(
+                FastaReader<ProteinSequence, AminoAcidCompound> fastaReaderProtein = null;
+                fastaReaderProtein = new FastaReader<ProteinSequence, AminoAcidCompound>(
                         fileWithSequence,
                         new GenericFastaHeaderParser<>(),
                         new ProteinSequenceCreator(AminoAcidCompoundSet.getAminoAcidCompoundSet()));
-
                 sequenceList = fastaReaderProtein.process().values().stream().collect(Collectors.toList());
                 break;
         }
@@ -199,15 +208,32 @@ public class Controller implements Initializable {
 
     private Sequence getSequenceFromInputText(SequenceType selectedSequenceType, String inputText, Sequence sequence)
             throws CompoundNotFoundException {
+        if (selectedSequenceType == null) {
+            AlertClass.showAlert("Wrong Matching", null, "Not selected sequence type");
+            return null;
+        }
         switch (selectedSequenceType) {
             case DNA:
-                sequence = new DNASequence(inputText);
+                try {
+                    sequence = new DNASequence(inputText);
+                } catch (CompoundNotFoundException e) {
+                    AlertClass.showAlert("Wrong Matching", null, "Wrong sequence type");
+                }
                 break;
             case RNA:
-                sequence = new RNASequence(inputText);
+                try {
+                    sequence = new RNASequence(inputText);
+                } catch (CompoundNotFoundException e) {
+                    AlertClass.showAlert("Wrong Matching", null, "Wrong sequence type");
+                }
                 break;
             case PROTEIN:
-                sequence = new ProteinSequence(inputText);
+                try {
+                    sequence = new ProteinSequence(inputText);
+                } catch (CompoundNotFoundException e) {
+                    AlertClass.showAlert("Wrong Matching", null, "Wrong sequence type");
+                    ;
+                }
                 break;
         }
         return sequence;
@@ -215,15 +241,41 @@ public class Controller implements Initializable {
 
     @FXML
     private void calculateMultiAlignment() {
-        Alignments.ProfileProfileAlignerType profileProfileAlignerType =
-                profilesListView.getSelectionModel().getSelectedItem();
+        // Default values
+        Alignments.ProfileProfileAlignerType profileProfileAlignerType = Alignments.ProfileProfileAlignerType.GLOBAL;
+        Alignments.PairwiseSequenceScorerType pairwiseSequenceScorerType = Alignments.PairwiseSequenceScorerType.GLOBAL;
 
-        Alignments.PairwiseSequenceScorerType pairwiseSequenceScorerType =
-                scoringTypesListView.getSelectionModel().getSelectedItem();
+        if (profilesListView.getSelectionModel().getSelectedItem() != null) {
+            profileProfileAlignerType = profilesListView.getSelectionModel().getSelectedItem();
+        }
+        if (profilesListView.getSelectionModel().getSelectedItem() != null) {
+            pairwiseSequenceScorerType = scoringTypesListView.getSelectionModel().getSelectedItem();
+        }
 
-        String result = Alignments.getMultipleSequenceAlignment(
-                this.sequences, profileProfileAlignerType, pairwiseSequenceScorerType).toString();
-
+        String result = "";
+        try {
+            result = Alignments.getMultipleSequenceAlignment(
+                    this.sequences, profileProfileAlignerType, pairwiseSequenceScorerType).toString();
+        } catch (Exception e) {
+            result = "";
+            AlertClass.showAlert("Wrong Matching", null, "Wrong chosen profile or score");
+        }
         resultTextArea.setText(result);
+    }
+
+    @FXML
+    private void clearAppSequences() {
+        sequences.clear();
+        updateSequenceInApp();
+    }
+
+    private void updateSequenceInApp() {
+        List<String> list = new ArrayList<String>();
+        for (Sequence item : sequences) {
+            list.add(item.getSequenceAsString());
+        }
+        ObservableList<String> items = FXCollections.observableArrayList(list);
+        sequenceInApp.setItems(items);
+        sequenceInApp.refresh();
     }
 }
